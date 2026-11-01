@@ -30,6 +30,21 @@ jobs:
       codeql-languages: '["go"]'
     secrets: inherit
 
+  # Code quality + Sonar security findings. PRs get the quality gate on new code;
+  # develop / release builds keep the long-lived analysis that Sonar reports use.
+  sonar:
+    if: >-
+      github.event_name == 'pull_request' || github.ref_name == 'develop' ||
+      startsWith(github.ref_name, 'release/')
+    uses: NiveshRamesh/ci-templates/.github/workflows/sonar.yml@v1
+    permissions:
+      contents: read
+      pull-requests: read
+    with:
+      language: go
+      test-command: go test -coverprofile=cover.out ./...
+    secrets: inherit
+
   build-deploy:
     if: github.event_name != 'pull_request'
     uses: NiveshRamesh/ci-templates/.github/workflows/build-deploy.yml@v1
