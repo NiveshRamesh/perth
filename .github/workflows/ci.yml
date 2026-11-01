@@ -1,0 +1,45 @@
+# Thin caller: all logic lives in NiveshRamesh/ci-templates so every service runs the
+# same, centrally maintained security pipeline. Only the language settings differ.
+name: CI
+
+on:
+  pull_request:
+    branches: [develop, "release/**"]
+  push:
+    branches: [develop, "feature/**", "release/**"]
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: ci-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  pr-checks:
+    if: github.event_name == 'pull_request'
+    uses: NiveshRamesh/ci-templates/.github/workflows/pr-checks.yml@v1
+    permissions:
+      contents: read
+      security-events: write
+      pull-requests: write
+      actions: read
+    with:
+      language: go
+      test-command: go test -race -coverprofile=cover.out ./... && go tool cover -func=cover.out
+      codeql-languages: '["go"]'
+    secrets: inherit
+
+  build-deploy:
+    if: github.event_name != 'pull_request'
+    uses: NiveshRamesh/ci-templates/.github/workflows/build-deploy.yml@v1
+    permissions:
+      contents: read
+      packages: write
+      security-events: write
+      id-token: write
+      attestations: write
+    with:
+      app-port: 8080
+      health-path: /health
+    secrets: inherit

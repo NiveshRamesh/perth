@@ -1,0 +1,22 @@
+# Fails as soon as a wrongly named branch is created (mirrors the org branch_rules.yml).
+name: Branch rules
+
+on: create
+
+permissions: {}
+
+jobs:
+  check-name:
+    if: github.ref_type == 'branch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate branch name
+        env:
+          BR: ${{ github.ref_name }}
+        run: |
+          if [[ "$BR" =~ ^(feature|hotfix)/[A-Z][A-Z0-9]+-[0-9]+$ || "$BR" =~ ^release/[0-9]+\.[0-9]+$ || "$BR" == develop || "$BR" == dependabot/* ]]; then
+            echo "Branch name OK: $BR"
+          else
+            echo "::error::Invalid branch '$BR'. Use feature/<JIRA-ID> (e.g. feature/CCBD-1234), hotfix/<JIRA-ID> or release/<x.y>."
+            exit 1
+          fi

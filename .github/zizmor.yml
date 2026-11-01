@@ -1,0 +1,7 @@
+# zizmor config: allow tag-pinning (@v1) for our own central templates only.
+rules:
+  unpinned-uses:
+    config:
+      policies:
+        "NiveshRamesh/*": ref-pin
+        "*": hash-pin
