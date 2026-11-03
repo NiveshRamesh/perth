@@ -28,7 +28,23 @@ jobs:
       language: go
       test-command: go test -race -coverprofile=cover.out ./... && go tool cover -func=cover.out
       codeql-languages: '["go"]'
-    secrets: inherit
+
+  # Code quality + Sonar security findings. PRs get the quality gate on new code;
+  # develop / release builds keep the long-lived analysis that Sonar reports use.
+  sonar:
+    if: >-
+      github.event_name == 'pull_request' || github.ref_name == 'develop' ||
+      startsWith(github.ref_name, 'release/')
+    uses: NiveshRamesh/ci-templates/.github/workflows/sonar.yml@v1
+    permissions:
+      contents: read
+      pull-requests: read
+    with:
+      language: go
+      test-command: go test -coverprofile=cover.out ./...
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
   build-deploy:
     if: github.event_name != 'pull_request'
@@ -42,4 +58,9 @@ jobs:
     with:
       app-port: 8080
       health-path: /health
-    secrets: inherit
+    secrets:
+      CICD_APP_CLIENT_ID: ${{ secrets.CICD_APP_CLIENT_ID }}
+      CICD_APP_PRIVATE_KEY: ${{ secrets.CICD_APP_PRIVATE_KEY }}
+      JIRA_URL: ${{ secrets.JIRA_URL }}
+      JIRA_USERNAME: ${{ secrets.JIRA_USERNAME }}
+      JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
