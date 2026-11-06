@@ -1,2 +1,4 @@
 * @NiveshRamesh
 /.github/ @NiveshRamesh
+# Vulnerability exceptions: in the org, use the security team here
+/.trivyignore.yaml @NiveshRamesh
