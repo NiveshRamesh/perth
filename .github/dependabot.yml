@@ -1,3 +1,7 @@
+# Dependabot: weekly update PRs, grouped to keep the number of PRs low.
+# Patch updates merge themselves once all checks pass (dependabot-auto-merge.yml);
+# minor and major updates wait for a human. Version updates wait 7 days after a release
+# (cooldown) so a malicious or broken release can be caught first; security updates do not wait.
 version: 2
 updates:
   - package-ecosystem: gomod
@@ -6,7 +10,17 @@ updates:
     target-branch: develop
     cooldown: { default-days: 7 }
     groups:
-      go-deps: { patterns: ["*"] }
+      go-security:
+        applies-to: security-updates
+        patterns: ["*"]
+      go-patch:
+        applies-to: version-updates
+        patterns: ["*"]
+        update-types: ["patch"]
+      go-minor:
+        applies-to: version-updates
+        patterns: ["*"]
+        update-types: ["minor"]
   - package-ecosystem: docker
     directory: /
     schedule: { interval: weekly }
@@ -17,3 +31,6 @@ updates:
     schedule: { interval: weekly }
     target-branch: develop
     cooldown: { default-days: 7 }
+    groups:
+      actions:
+        patterns: ["*"]
