@@ -1,0 +1,19 @@
+# Lets Dependabot's patch updates merge themselves once every required check passes.
+# The rules live in ci-templates (dependabot-auto-merge.yml); this file only picks the ecosystems.
+name: Dependabot auto-merge
+
+on:
+  pull_request:
+    branches: [develop]
+
+permissions: {}
+
+jobs:
+  auto-merge:
+    if: github.event.pull_request.user.login == 'dependabot[bot]'
+    uses: NiveshRamesh/ci-templates/.github/workflows/dependabot-auto-merge.yml@v1
+    permissions:
+      contents: write
+      pull-requests: write
+    with:
+      allowed-ecosystems: '["github_actions", "go_modules"]'
